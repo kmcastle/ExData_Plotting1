@@ -1,4 +1,3 @@
-library(lubridate)
 library(dplyr)
 
 ## read in data
@@ -9,36 +8,29 @@ householdPower <- read.table(
   header = TRUE)
 
 ## convert the variables "Date" and "Time" to date-time objects
-householdPower$Date <- dmy(householdPower$Date)
-householdPower$Time <- hms(householdPower$Time)
+householdPower$Date <- as.POSIXct(dmy_hms(as.character(paste(householdPower$Date, householdPower$Time))))
 
 ## subset data for the dates 2002-02-01 and 2002-02-02
-powerSubset <- filter(householdPower, Date == "2007-02-01" | Date == "2007-02-02")
+powerSubset <- filter(householdPower, date(Date) == "2007-02-01" | date(Date) == "2007-02-02")
 
 ## plot variables sub_metering_1, sub_metering_2, and sub_metering_3
+
+png(file = "plot3.png", height = 480, width = 480, units = "px")
+
 with(powerSubset, 
-     plot(Sub_metering_1, 
+     plot(Date, Sub_metering_1, 
           type = "l", 
-          col = "black", 
-          xaxt = "n", 
+          col = "black",
           xlab = "", 
           ylab = "Energy sub metering"))
 with(powerSubset, 
-     lines(Sub_metering_2, 
+     lines(Date, Sub_metering_2, 
            col = "red"))
 with(powerSubset, 
-     lines(Sub_metering_3, 
+     lines(Date, Sub_metering_3, 
            col = "blue"))
-
-## label x-axis with abbreviated days of the week
-axis(1, 
-     at = c(0, 1500, 2900), 
-     labels = c("Thu", "Fri", "Sat"))
 
 ## create legend
 legend("topright", c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), lty = 1, col = c("black", "red", "blue"))
-
-## save as png
-dev.copy(png, file = "plot3.png", height = 480, width = 480, units = "px")
 
 dev.off()
